@@ -19,9 +19,7 @@ fn main() {
 }
 */
 
-use std::io::{self, Read};
-use crossterm::terminal::enable_raw_mode;
-use crossterm::terminal::disable_raw_mode;
+#![warn(clippy::all, clippy::pedantic)]
 
 mod editor;
 use editor::Editor;
