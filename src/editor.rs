@@ -1,6 +1,7 @@
 use crossterm::event::{read, Event, Event::Key, KeyCode::Char, KeyEvent, KeyModifiers};
-use crate::term::*;
 
+mod term;
+use term::Terminal;
 
 pub struct Editor {
     should_quit: bool,
@@ -10,26 +11,25 @@ pub struct Editor {
 impl Editor {
 
     pub fn default() -> Self {
-        Editor {should_quit: false}
+        Self {should_quit: false}
     }
 
     pub fn run(&mut self) {
-        initialize().unwrap();
-        draw_rows().unwrap();
+        Terminal::initialize().unwrap();
         let result = self.repl();
-        terminate().unwrap();   // called from mod term
+        Terminal::terminate().unwrap();   // called from mod term
         result.unwrap();
     }
 
     fn repl(&mut self) -> Result<(), std::io::Error> {
         loop {
 
-            let event = read()?;
-            self.evaluate_event(&event);
             self.refresh_screen()?;
             if self.should_quit {
                 break;
             }
+            let event = read()?;
+            self.evaluate_event(&event);
         }
         Ok(())
     }
@@ -50,11 +50,24 @@ impl Editor {
 
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         if self.should_quit {
-            clear_screen()?;
+            Terminal::clear_screen()?;
             print!("Goodbye. \r\n");
+        } else {
+            Self::draw_rows()?;
+            Terminal::move_cursor_to(0,0)?;
         }
 
         Ok(())
     }
 
+    fn draw_rows() -> Result<(), std::io::Error> {
+        let height = Terminal::size()?.1;
+        for current_row in 0..height {
+            print!("~");
+            if current_row + 1 < height {
+                print!("\r\n");
+            }
+        }
+        Ok(())
+    }
 }

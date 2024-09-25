@@ -24,8 +24,6 @@ fn main() {
 mod editor;
 use editor::Editor;
 
-mod term;
-
 fn main() {
     Editor::default().run();
 }
