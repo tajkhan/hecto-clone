@@ -1,4 +1,4 @@
-use crossterm::event::{read, Event, Event::Key, KeyCode::Char, KeyEvent, KeyModifiers};
+use crossterm::event::{read, Event, Event::Key, KeyCode, KeyCode::Char, KeyEvent, KeyModifiers};
 use std::io::Error;
 
 mod term;
@@ -9,13 +9,14 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub struct Editor {
     should_quit: bool,
+    cursor_pos: Position,
 }
 
 
 impl Editor {
 
     pub fn default() -> Self {
-        Self {should_quit: false}
+        Self {should_quit: false, cursor_pos: Position{x:0, y:0}}
     }
 
     pub fn run(&mut self) {
@@ -39,6 +40,10 @@ impl Editor {
     }
 
     fn evaluate_event(&mut self, event: &Event) {
+
+        let Size{height, width} = Terminal::size().unwrap(); // returns incorrect height!!
+        let height= 55 as usize;    // fixing height
+
         if let Key(KeyEvent {
             code, modifiers, ..
         }) = event {
@@ -46,6 +51,14 @@ impl Editor {
                 Char('q') if *modifiers == KeyModifiers::CONTROL => {
                     self.should_quit = true;
                 },
+                KeyCode::Left => {if self.cursor_pos.x>0 {self.cursor_pos.x -=1;}},
+                KeyCode::Right => {if self.cursor_pos.x<width {self.cursor_pos.x +=1;}},
+                KeyCode::Up => {if self.cursor_pos.y>0 {self.cursor_pos.y -=1;}},
+                KeyCode::Down => {if self.cursor_pos.y<height {self.cursor_pos.y +=1;}},
+                KeyCode::Home => {self.cursor_pos.x=0;},
+                KeyCode::End => {self.cursor_pos.x=width;},
+                KeyCode::PageUp => {self.cursor_pos.y=0;},
+                KeyCode::PageDown => {self.cursor_pos.y=height;},
 
                 _ => (),
             }
@@ -59,7 +72,7 @@ impl Editor {
             Terminal::print("Goodbye. \r\n")?;
         } else {
             Self::draw_rows()?;
-            Terminal::move_cursor_to(Position{x:0, y:0})?;
+            Terminal::move_cursor_to(self.cursor_pos)?;
         }
         Terminal::show_cursor()?;
         Terminal::execute()?;
@@ -89,6 +102,9 @@ impl Editor {
     fn draw_rows() -> Result<(), Error> {
         let Size{height, ..} = Terminal::size()?; // returns incorrect height!!
         let height = 55 as usize;    // fixing height
+
+        Terminal::move_cursor_to(Position{x:0, y:0})?;
+
         for current_row in 0..height {
             Terminal::clear_line()?;
 
