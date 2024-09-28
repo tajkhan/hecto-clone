@@ -4,22 +4,30 @@ use std::io::Error;
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+mod buffer;
+use buffer::Buffer;
+
+#[derive(Default)]
 pub struct View {
+    buf: Buffer,
 }
 
 impl View {
-    pub fn render()  -> Result<(), Error> {
+    pub fn render(&self)  -> Result<(), Error> {
         let Size{height, ..} = Terminal::size()?; // returns incorrect height!!
         let height = 55 as usize;    // fixing height
 
         for current_row in 0..height {
             Terminal::clear_line()?;
 
-            #[allow(clippy::integer_division)]
-            if current_row == 0 {
-                Terminal::print("Hello, world!")?;
+            if let Some(line) = self.buf.lines.get(current_row) {
+                Terminal::print(line)?;
+                Terminal::print("\r\n")?;
+                continue;
             }
-            else if current_row == height/3 {
+
+            #[allow(clippy::integer_division)]
+            if current_row == height/3 {
                 Self::draw_welcome_message()?;
             } else {
                 Self::draw_empty_row()?;
