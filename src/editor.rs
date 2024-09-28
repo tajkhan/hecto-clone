@@ -5,8 +5,7 @@ use crossterm::event::{
     KeyCode, KeyEvent, KeyModifiers,
 };
 
-use std::io::Error;
-use std::option::Option;
+use std::{env, io::Error};
 
 mod term;
 use term::{Terminal, Size, Position};
@@ -29,15 +28,19 @@ pub struct Editor {
 
 impl Editor {
 
-    pub fn run(&mut self, filename: Option<String>) {
-        if let Some(fname) = filename {
-            self.view.load(&fname);
-        }
-
+    pub fn run(&mut self) {
         Terminal::initialize().unwrap();
+        self.handle_args();
         let result = self.repl();
         Terminal::terminate().unwrap();   // called from mod term
         result.unwrap();
+    }
+
+    fn handle_args(&mut self) {
+        let args: Vec<String> = env::args().collect();
+        if let Some(file_name) = args.get(1) {
+            self.view.load(file_name);
+        }
     }
 
     fn repl(&mut self) -> Result<(), Error> {

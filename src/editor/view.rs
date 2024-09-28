@@ -15,32 +15,20 @@ pub struct View {
 impl View {
 
     pub fn load(&mut self, filename: &str) {
-       let result = std::fs::read_to_string(filename);
-        if let Ok(file_contents) = result {
-            for line in file_contents.lines() {
-                 self.buf.lines.push(line.to_string());
-            }
-        }
-        else {
-            println!("Error: file not foound: {filename}");
+        if let Ok(buffer) = Buffer::load(filename) {
+            self.buf = buffer;
         }
     }
 
-    pub fn render(&self)  -> Result<(), Error> {
+    pub fn render_welcome_screen()  -> Result<(), Error> {
         let Size{height, ..} = Terminal::size()?; // returns incorrect height!!
         let height = 55 as usize;    // fixing height
 
         for current_row in 0..height {
             Terminal::clear_line()?;
 
-            if let Some(line) = self.buf.lines.get(current_row) {
-                Terminal::print(line)?;
-                Terminal::print("\r\n")?;
-                continue;
-            }
-
             #[allow(clippy::integer_division)]
-            if self.buf.is_empty() && current_row == height/3 {
+            if current_row == height/3 {
                 Self::draw_welcome_message()?;
             } else {
                 Self::draw_empty_row()?;
@@ -52,6 +40,32 @@ impl View {
         }
         //dummy debug
         println!("=== {0:?}", Terminal::size());
+        Ok(())
+    }
+
+    pub fn render_buffer(&self) -> Result<(), Error> {
+        let Size{height, ..} = Terminal::size()?; // returns incorrect height!!
+        let height = 55 as usize;    // fixing height
+
+        for current_row in 0..height {
+            Terminal::clear_line()?;
+
+            if let Some(line) = self.buf.lines.get(current_row) {
+                Terminal::print(line)?;
+                Terminal::print("\r\n")?;
+            } else {
+                Self::draw_empty_row()?;
+            }
+        }
+        Ok(())
+    }
+
+    pub fn render(&self) -> Result<(), Error> {
+        if self.buf.is_empty() {
+            Self::render_welcome_screen()?;
+        } else {
+            self.render_buffer()?;
+        }
         Ok(())
     }
 

@@ -25,13 +25,5 @@ mod editor;
 use editor::Editor;
 
 fn main() {
-
-    let args: Vec<String> = std::env::args().collect();
-    if let Some(filename) = args.get(1) {
-        println!("Opening file {filename}");
-        Editor::default().run(Some(filename.clone()));
-    } else {
-        Editor::default().run(None);
-    }
-
+    Editor::default().run();
 }
