@@ -6,6 +6,7 @@ use crossterm::event::{
 };
 
 use std::io::Error;
+use std::option::Option;
 
 mod term;
 use term::{Terminal, Size, Position};
@@ -28,7 +29,11 @@ pub struct Editor {
 
 impl Editor {
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self, filename: Option<String>) {
+        if let Some(fname) = filename {
+            self.view.load(&fname);
+        }
+
         Terminal::initialize().unwrap();
         let result = self.repl();
         Terminal::terminate().unwrap();   // called from mod term

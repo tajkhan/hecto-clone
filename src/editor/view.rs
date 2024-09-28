@@ -13,6 +13,19 @@ pub struct View {
 }
 
 impl View {
+
+    pub fn load(&mut self, filename: &str) {
+       let result = std::fs::read_to_string(filename);
+        if let Ok(file_contents) = result {
+            for line in file_contents.lines() {
+                 self.buf.lines.push(line.to_string());
+            }
+        }
+        else {
+            println!("Error: file not foound: {filename}");
+        }
+    }
+
     pub fn render(&self)  -> Result<(), Error> {
         let Size{height, ..} = Terminal::size()?; // returns incorrect height!!
         let height = 55 as usize;    // fixing height
@@ -27,7 +40,7 @@ impl View {
             }
 
             #[allow(clippy::integer_division)]
-            if current_row == height/3 {
+            if self.buf.is_empty() && current_row == height/3 {
                 Self::draw_welcome_message()?;
             } else {
                 Self::draw_empty_row()?;
