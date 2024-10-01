@@ -45,17 +45,18 @@ impl View {
 
     pub fn render_buffer(&self) -> Result<(), Error> {
         let Size{height, ..} = Terminal::size()?; // returns incorrect height!!
-        let height = 55 as usize;    // fixing height
+        let height = 20 as usize;    // fixing height
 
         for current_row in 0..height {
             Terminal::clear_line()?;
 
             if let Some(line) = self.buf.lines.get(current_row) {
                 Terminal::print(line)?;
-                Terminal::print("\r\n")?;
             } else {
                 Self::draw_empty_row()?;
             }
+
+            Terminal::print("\r\n")?;
         }
         Ok(())
     }
