@@ -4,7 +4,7 @@ use crossterm::{queue, Command};
 use crossterm::style::Print;
 use std::io::{stdout, Error, Write};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone)]
 pub struct Size {
     pub height: usize,
     pub width: usize,

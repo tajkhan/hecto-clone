@@ -7,9 +7,10 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 mod buffer;
 use buffer::Buffer;
 
-#[derive(Default)]
 pub struct View {
     buf: Buffer,
+    needs_redraw: bool,
+    size: Size,
 }
 
 impl View {
@@ -17,7 +18,13 @@ impl View {
     pub fn load(&mut self, filename: &str) {
         if let Ok(buffer) = Buffer::load(filename) {
             self.buf = buffer;
+            self.needs_redraw = true;
         }
+    }
+
+    pub fn resize(&mut self, to: Size) {
+        self.size = to;
+        self.needs_redraw = true;
     }
 
     fn render_line(at: usize, line_text: &str) -> Result<(), Error> {
@@ -48,8 +55,15 @@ impl View {
         full_message
     }
 
-    pub fn render(&self) -> Result<(), Error> {
-        let Size{height, width} = Terminal::size()?; // returns incorrect height!!
+    pub fn render(&mut self) -> Result<(), Error> { // mut making because needs_redraw=false
+        if !self.needs_redraw {
+            return Ok(());
+        }
+
+        let Size{height, width} = self.size;
+        if height==0 || width==0 {
+            return Ok(());
+        }
         let height = 20 as usize;    // fixing height
 
         #[allow(clippy::integer_division)]
@@ -69,8 +83,18 @@ impl View {
                 Self::render_line(current_row, "~")?;
             }
         }
-
+        self.needs_redraw = false;
         Ok(())
     }
 
+}
+
+impl Default for View {
+    fn default() -> Self {
+        Self {
+            buf: Buffer::default(),
+            needs_redraw: true,
+            size: Terminal::size().unwrap_or_default(),
+        }
+    }
 }
