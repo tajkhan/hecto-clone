@@ -1,29 +1,19 @@
-/*
- * ChatGPT
- */
-/*
-use crossterm::terminal::{enable_raw_mode, disable_raw_mode};
+#![warn(
+    clippy::all,
+    clippy::pedantic,
+    clippy::print_stdout,
+    clippy::arithmetic_side_effects,
+    clippy::as_conversions,
+    clippy::integer_division,
+)]
+
 use std::io::{self, Write};
+use crossterm::{execute, terminal::{EnterAlternateScreen, LeaveAlternateScreen}};
 
-fn main() {
-
-    println!("TERM: {:?}", std::env::var("TERM"));
-
-    if atty::is(atty::Stream::Stdout) {
-        enable_raw_mode().expect("Failed to enable raw mode");
-        // Your code here
-        disable_raw_mode().expect("Failed to disable raw mode");
-    } else {
-        eprintln!("Raw mode is not supported in this environment");
-    }
-}
-*/
-
-#![warn(clippy::all, clippy::pedantic, clippy::print_stdout, clippy::arithmetic_side_effects, clippy::as_conversions, clippy::integer_division)]
 
 mod editor;
 use editor::Editor;
 
 fn main() {
-    Editor::default().run();
+    Editor::new().unwrap().run();
 }
